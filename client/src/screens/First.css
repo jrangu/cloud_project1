@@ -1,0 +1,13 @@
+.First .placeholder {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.First .placeholder p {
+  color: #999;
+}
+
+.First .placeholder h1 {
+  font-weight: 600;
+  font-family: "Open Sans", sans-serif; 
+}

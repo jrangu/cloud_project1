@@ -1,0 +1,27 @@
+@media all and (min-width: 480px) {
+    .List {
+      padding: 0px 0;
+    }
+  
+    .List form {
+      margin: 0 auto;
+      max-width: 320px;
+    }
+
+    .List table{
+      margin-top: 30px;
+      padding: 0px;
+      
+    }
+    
+    .List tr {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .List td{
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  }
