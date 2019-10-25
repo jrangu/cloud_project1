@@ -27,18 +27,26 @@ public final class UserFileRelationDb {
 			+ "user_file_relation(file_key, user_id, first_name, last_name, file_name, creation_timestamp, last_updated_timestamp) "
 			+ "values (?, ?, ?, ?, ?, ?, ?)";
 
+	private static final String UPDATE_USER_FILE_RELATION_QUERY = "INSERT "
+			+ "user_file_relation(file_key, user_id, first_name, last_name, file_name, creation_timestamp, last_updated_timestamp) "
+			+ "values (?, ?, ?, ?, ?, ?, ?)";
+
+	private static final String DELETE_USER_FILE_RELATION_QUERY = "UPDATE user_file_relation"
+			+ "set deleted_flag = true"
+			+ "where file_key = ?";
+
 	private Connection connection;
 
 	public UserFileRelationDb(Connection connection) {
 		this.connection = connection;
 	}
 
-	public Set<UserFileRelation> get(String user_id) throws SQLException {
+	public Set<UserFileRelation> get(String userId) throws SQLException {
 		PreparedStatement preparedStatement = null;
 		ResultSet rs = null;
 		try {
 			preparedStatement = connection.prepareStatement(GET_FILES_FOR_USER_ID_QUERY);
-			preparedStatement.setString(1, user_id);
+			preparedStatement.setString(1, userId);
 			rs = preparedStatement.executeQuery();
 			Set<UserFileRelation> set = new HashSet<>();
 			while (rs.next()) {
@@ -67,7 +75,23 @@ public final class UserFileRelationDb {
 			close(Optional.ofNullable(preparedStatement), Optional.empty());
 		}
 	}
+	
+	public void delete(String fileKey) throws SQLException {
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		try {
+			preparedStatement = connection.prepareStatement(DELETE_USER_FILE_RELATION_QUERY);
+			preparedStatement.setString(1, fileKey);
+			rs = preparedStatement.executeQuery();
+		} finally {
+			close(Optional.ofNullable(preparedStatement), Optional.ofNullable(rs));
+		}
+	}
 
+	public void update(String oldFileKey, String newFileKey) {
+		
+	}
+	
 	private UserFileRelation readUserFileRelation(ResultSet rs) throws SQLException {
 		return new UserFileRelation().setCreatedTimestamp(rs.getTimestamp("creation_timestamp"))
 				.setFileKey(rs.getString("file_key")).setFileName(rs.getString("file_name"))

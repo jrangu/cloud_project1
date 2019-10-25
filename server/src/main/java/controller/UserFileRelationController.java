@@ -18,8 +18,10 @@ import org.apache.commons.io.FileUtils;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.google.gson.Gson;
@@ -37,6 +39,15 @@ import spark.Response;
  */
 public class UserFileRelationController {
 	private static Gson gson = new GsonBuilder().create();
+	private static Regions clientRegion = Regions.US_EAST_2;
+	private static String bucketName = "globalcustbucket";
+	private static AmazonS3 s3Client;
+	
+	static {
+		s3Client = AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider())
+				.withRegion(clientRegion).build();
+	}
+
 
 	public static Object getFileList(Request request, Response response) throws SQLException {
 		response.type("application/json");
@@ -57,23 +68,23 @@ public class UserFileRelationController {
 		request.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/temp"));
 		Part part = request.raw().getPart("file");
 		File scratchFile = File.createTempFile("prefix", "suffix");
-		
+
 		String file_key = UUID.randomUUID().toString();
 		String userName = request.queryParams("user_name");
 		String firstName = request.params("first_name");
 		String lastName = request.params("last_name");
 		String file_name = part.getSubmittedFileName();
 
-		AWSCredentials credentials = new ProfileCredentialsProvider("default").getCredentials();
-		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
-		credentialsProvider.getCredentials();
-		AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
-				.withRegion("us-east-2").build();
+//		AWSCredentials credentials = new ProfileCredentialsProvider("default").getCredentials();
+//		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
+//		credentialsProvider.getCredentials();
+//		AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
+//				.withRegion("us-east-2").build();
 		try (InputStream input = part.getInputStream()) {
 			FileUtils.copyInputStreamToFile(input, scratchFile);
 		}
-		
-		PutObjectResult putObjectResult = s3.putObject(new PutObjectRequest("globalcustbucket", file_key, scratchFile));
+
+		PutObjectResult putObjectResult = s3Client.putObject(new PutObjectRequest(bucketName, file_key, scratchFile));
 		System.out.println(putObjectResult.getMetadata().getRawMetadata());
 
 		try (Connection connection = DatabaseConnectionManager.getConnection()) {
@@ -82,10 +93,6 @@ public class UserFileRelationController {
 					.setFirstName(firstName).setLastName(lastName).setFileName(file_name)
 					.setUpdatedTimestamp(extractTimeStamp(putObjectResult))
 					.setCreatedTimestamp(extractTimeStamp(putObjectResult));
-////      Optional<ErrorResponse> validationErrors = validate(prescription);
-//			if (validationErrors.isPresent()) {
-//				return validationErrors;
-//			}
 			prescriptionDb.upload(userFileRelation);
 			return new UserFileRelationDb(connection).get(userName);
 		}
@@ -96,14 +103,16 @@ public class UserFileRelationController {
 	}
 
 	public static Object deleteFile(Request request, Response response) throws SQLException {
+		String fileKey = request.queryParams("file_key");
+//		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider())
+//				.withRegion("us-east-2").build();
+
+		s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileKey));
+
 		response.type("application/json");
 		try (Connection connection = DatabaseConnectionManager.getConnection()) {
-			Set<UserFileRelation> prescription = new UserFileRelationDb(connection).get("user_1");
-			if (!prescription.isEmpty()) {
-				return prescription;
-			} else {
-				return new ErrorResponse().setErrorMessage("Prescription not found");
-			}
+			new UserFileRelationDb(connection).delete(fileKey);
+			return "Success";
 		}
 	}
 
