@@ -1,0 +1,34 @@
+@media all and (min-width: 480px) {
+    .AdminList {
+      padding: 0px 0;
+    }
+  
+    .AdminList form {
+      margin-left: 20px;
+      max-width: 320px;
+    }
+
+    .AdminList table{
+      margin-top: 30px;
+      padding: 0px;
+      
+    }
+    
+  .AdminList tr {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .AdminList td{
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .AdminList th{
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+}
