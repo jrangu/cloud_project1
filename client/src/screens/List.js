@@ -1,9 +1,8 @@
-import React, { useRef, Component } from "react";
+import React, { Component } from "react";
 import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "./List.css";
 import { Auth } from 'aws-amplify';
 import { Nav, Navbar, NavItem } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 
 export default class List extends Component {
     constructor(props) {
@@ -12,6 +11,7 @@ export default class List extends Component {
         file : null,
         value : "",
         user:"",
+        apiResponse:[],
         students: [
             { id: 1, name: 'Wasif', age: 21, email: 'wasif@email.com' },
             { id: 2, name: 'Ali', age: 19, email: 'ali@email.com' },
@@ -19,17 +19,18 @@ export default class List extends Component {
             { id: 4, name: 'Asad', age: 25, email: 'asad@email.com' }
          ]
       };
-      this.handleChange = this.handleChange.bind(this);
+      this.handleChange = this.handleChange.bind(this);     
     }
-    renderTableData() {
-        return this.state.students.map((student, index) => {
-           const { id, name, age, email } = student 
+    
+    renderUserTableData() {
+        return this.state.apiResponse.map((filedata, index) => {
+           const { file_key, file_name, creation_timestamp,last_name } = filedata 
            return (
-              <tr key={id}>
-                 <td>{id}</td>
-                 <td>{name}</td>
-                 <td>{age}</td>
-                 <td>{email}</td>
+              <tr key={file_key}>
+                 <td>{file_name}</td>
+                 <td>{file_key}</td>
+                 <td>{creation_timestamp}</td>
+                 {/* <td>{last_name}</td> */}
                  <td><Button
                         block
                         type="submit"
@@ -50,6 +51,7 @@ export default class List extends Component {
            )
         })
      }
+    
 
     fileUpload = async event => {
         event.preventDefault();
@@ -73,6 +75,19 @@ export default class List extends Component {
         .then(function(res){ return res; })
     }
 
+    getfileList = async event => {
+        this.state.user = (await Auth.currentAuthenticatedUser()).username;
+        //alert(this.state.user);
+        var url = "http://192.168.0.6:4567/fileList?user_name="+"user_1";
+       // fetch("http://192.168.0.6:4567/fileList?username=${encodeURIComponent(this.state.user)}")
+       fetch(url ,
+        {
+            mode: 'no-cors'
+        }) 
+       .then(res => res.json())
+        .then(res => this.setState({ apiResponse: res }));
+    }
+
     onFileChange = event => {
         this.state.file = event.target.files[0];
     }
@@ -92,7 +107,7 @@ export default class List extends Component {
         <Navbar fluid collapseOnSelect>
             <Navbar.Header>
                 <Navbar.Brand>
-                SafeDocs
+                    SafeDocs
                 </Navbar.Brand>
             </Navbar.Header>
                 <Navbar.Collapse>
@@ -103,7 +118,10 @@ export default class List extends Component {
         </Navbar>
         );
     }
-
+    // async componentWillMount() {
+    //     await this.getfileList();
+    //     alert("check"+this.state.user);
+    // }
     render() {
         return (
             <div className="List">
@@ -130,9 +148,17 @@ export default class List extends Component {
                         >
                         Upload
                     </Button>
-                    <table id='students'>
+                    <table id='filelist'>
                         <tbody>
-                            {this.renderTableData()}
+                            <tr>
+                                <th>FILE NAME</th>
+                                <th>FILE DESCRIPTION</th>
+                                <th>CREATED DATE TIME</th>
+                                <th>UPDATED DATE TIME</th>
+                                <th></th>
+                                
+                            </tr>
+                            {this.renderUserTableData()}
                         </tbody>
                     </table>
                 </form>   
@@ -140,4 +166,8 @@ export default class List extends Component {
             </div>
         );
     }
+
+
+
+    
 }

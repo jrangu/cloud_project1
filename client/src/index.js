@@ -7,8 +7,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import Amplify from "aws-amplify";
 import config from "./configurations";
 
-//ReactDOM.render(<App />, document.getElementById('root'));
-//Adding router
+
 
 
 Amplify.configure({
@@ -21,6 +20,8 @@ Amplify.configure({
   }
 });
 
+//ReactDOM.render(<App />, document.getElementById('root'));
+//Adding router
 ReactDOM.render(
   <Router>
     <App />

@@ -4,13 +4,15 @@ import "./Login.css";
 import { Auth } from "aws-amplify";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
+import config from "./../configurations";
 
 export default class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
       email: "",
-      password: ""
+      password: "",
+      data:""
     };
   }
 
@@ -28,9 +30,18 @@ export default class Login extends Component {
     event.preventDefault();
   
     try {
-      await Auth.signIn(this.state.email, this.state.password);
-      alert("Logged in");
-      this.props.history.push("/list");
+      const user = await Auth.signIn(this.state.email, this.state.password);
+      alert("Logged in ");
+      Auth.currentAuthenticatedUser()
+      .then(data => {
+        if(data.username == config.ADMIN_USER){
+          this.props.history.push("/adminlist");
+        }else{
+          this.props.history.push("/list");
+        
+
+      }})
+      .catch(err => alert(err));    
     } catch (e) {
       alert(e.message);
     }
