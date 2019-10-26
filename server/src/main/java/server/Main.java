@@ -2,6 +2,7 @@ package server;
 
 import static spark.Spark.awaitInitialization;
 import static spark.Spark.get;
+import static spark.Spark.post;
 
 import api.JsonTransformer;
 import controller.UserFileRelationController;
@@ -13,9 +14,9 @@ public class Main {
 			return UserFileRelationController.getFileList(request, response);
 		}, new JsonTransformer());
 
-//		post("/upload", (request, response) -> {
-//			return UserFileRelationController.uploadFile(request, response);
-//		}, new JsonTransformer());
+		post("/upload", (request, response) -> {
+			return UserFileRelationController.uploadFile(request, response);
+		}, new JsonTransformer());
 		awaitInitialization();
 	}
 }

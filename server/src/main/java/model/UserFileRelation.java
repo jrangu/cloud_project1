@@ -5,8 +5,6 @@ import java.sql.Timestamp;
 import com.google.gson.annotations.SerializedName;
 
 public class UserFileRelation {
-	@SerializedName("file_key")
-	public String fileKey;
 	
 	@SerializedName("user_id")
 	public String userId;
@@ -29,14 +27,8 @@ public class UserFileRelation {
 	@SerializedName("delete_flag")
 	public Boolean isDeleted;
 
-	public String getFileKey() {
-		return fileKey;
-	}
-
-	public UserFileRelation setFileKey(String fileKey) {
-		this.fileKey = fileKey;
-		return this;
-	}
+	@SerializedName("file_desc")
+	public String fileDesc;
 
 	public String getUserId() {
 		return userId;
@@ -71,6 +63,15 @@ public class UserFileRelation {
 
 	public UserFileRelation setFileName(String fileName) {
 		this.fileName = fileName;
+		return this;
+	}
+
+	public String getFileDesc() {
+		return fileDesc;
+	}
+
+	public UserFileRelation setFileDesc(String fileDesc) {
+		this.fileDesc = fileDesc;
 		return this;
 	}
 

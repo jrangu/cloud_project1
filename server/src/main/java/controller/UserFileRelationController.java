@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
@@ -15,15 +14,13 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.util.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -42,12 +39,11 @@ public class UserFileRelationController {
 	private static Regions clientRegion = Regions.US_EAST_2;
 	private static String bucketName = "globalcustbucket";
 	private static AmazonS3 s3Client;
-	
+
 	static {
 		s3Client = AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider())
 				.withRegion(clientRegion).build();
 	}
-
 
 	public static Object getFileList(Request request, Response response) throws SQLException {
 		response.type("application/json");
@@ -69,11 +65,12 @@ public class UserFileRelationController {
 		Part part = request.raw().getPart("file");
 		File scratchFile = File.createTempFile("prefix", "suffix");
 
-		String file_key = UUID.randomUUID().toString();
-		String userName = request.queryParams("user_name");
-		String firstName = request.params("first_name");
-		String lastName = request.params("last_name");
-		String file_name = part.getSubmittedFileName();
+//		String file_key = UUID.randomUUID().toString();
+		String userName = null;
+		String firstName = null;
+		String lastName = null;
+		String fileDesc = null;
+		String fileName = part.getSubmittedFileName();
 
 //		AWSCredentials credentials = new ProfileCredentialsProvider("default").getCredentials();
 //		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
@@ -83,35 +80,44 @@ public class UserFileRelationController {
 		try (InputStream input = part.getInputStream()) {
 			FileUtils.copyInputStreamToFile(input, scratchFile);
 		}
-
-		PutObjectResult putObjectResult = s3Client.putObject(new PutObjectRequest(bucketName, file_key, scratchFile));
-		System.out.println(putObjectResult.getMetadata().getRawMetadata());
+		part = request.raw().getPart("user_name");
+		try (InputStream input = part.getInputStream()) {
+			userName = IOUtils.toString(input);
+		}
+		part = request.raw().getPart("first_name");
+		try (InputStream input = part.getInputStream()) {
+			firstName = IOUtils.toString(input);
+		}
+		part = request.raw().getPart("last_name");
+		try (InputStream input = part.getInputStream()) {
+			lastName = IOUtils.toString(input);
+		}
+		part = request.raw().getPart("file_desc");
+		try (InputStream input = part.getInputStream()) {
+			fileDesc = IOUtils.toString(input);
+		}
+		s3Client.putObject(new PutObjectRequest(bucketName, fileName, scratchFile));
 
 		try (Connection connection = DatabaseConnectionManager.getConnection()) {
 			UserFileRelationDb prescriptionDb = new UserFileRelationDb(connection);
-			UserFileRelation userFileRelation = new UserFileRelation().setFileKey(file_key).setUserId(userName)
-					.setFirstName(firstName).setLastName(lastName).setFileName(file_name)
-					.setUpdatedTimestamp(extractTimeStamp(putObjectResult))
-					.setCreatedTimestamp(extractTimeStamp(putObjectResult));
+			Timestamp timeStamp = new Timestamp(
+					s3Client.getObjectMetadata(bucketName, fileName).getLastModified().getTime());
+			UserFileRelation userFileRelation = new UserFileRelation().setUserId(userName).setFirstName(firstName)
+					.setLastName(lastName).setFileName(fileName).setFileDesc(fileDesc).setUpdatedTimestamp(timeStamp)
+					.setCreatedTimestamp(timeStamp);
 			prescriptionDb.upload(userFileRelation);
 			return new UserFileRelationDb(connection).get(userName);
 		}
 	}
 
-	private static Timestamp extractTimeStamp(PutObjectResult putObjectResult) {
-		return new Timestamp(putObjectResult.getMetadata().getLastModified().getTime());
-	}
-
 	public static Object deleteFile(Request request, Response response) throws SQLException {
+		String userName = request.queryParams("user_name");
 		String fileKey = request.queryParams("file_key");
-//		AmazonS3 s3Client = AmazonS3ClientBuilder.standard().withCredentials(new ProfileCredentialsProvider())
-//				.withRegion("us-east-2").build();
-
 		s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileKey));
 
 		response.type("application/json");
 		try (Connection connection = DatabaseConnectionManager.getConnection()) {
-			new UserFileRelationDb(connection).delete(fileKey);
+			new UserFileRelationDb(connection).delete(userName, fileKey);
 			return "Success";
 		}
 	}
