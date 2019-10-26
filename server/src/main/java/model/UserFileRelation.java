@@ -6,6 +6,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class UserFileRelation {
 	
+	@SerializedName("id")
+	public int id;
+	
 	@SerializedName("user_id")
 	public String userId;
 
@@ -30,6 +33,15 @@ public class UserFileRelation {
 	@SerializedName("file_desc")
 	public String fileDesc;
 
+	public int getId() {
+		return id;
+	}
+	
+	public UserFileRelation setId(int id) {
+		this.id = id;
+		return this;
+	}
+	
 	public String getUserId() {
 		return userId;
 	}

@@ -19,9 +19,9 @@ import model.UserFileRelation;
  */
 public final class UserFileRelationDb {
 
-	private static final String GET_FILES_FOR_USER_ID_QUERY = "SELECT user_id, "
-			+ "first_name, last_name, file_name, file_desc, creation_timestamp, last_updated_timestamp,"
-			+ " delete_flag from sys.user_file_table where user_id = ? and not delete_flag";
+	private static final String GET_FILES_FOR_USER_ID_QUERY = "SELECT * from sys.user_file_table where user_id = ? and not delete_flag";
+
+	private static final String GET_USER_FILE_RELATION_FOR_GIVEN_ID = "SELECT * from sys.user_file_table where id = ?";
 
 	private static final String INSERT_USER_FILE_RELATION_QUERY = "INSERT "
 			+ "sys.user_file_table(user_id, first_name, last_name, file_name, file_desc, creation_timestamp, last_updated_timestamp) "
@@ -30,8 +30,8 @@ public final class UserFileRelationDb {
 	private static final String UPDATE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table"
 			+ "set file_name = ?, file_name = ?, last_updated_timestamp = ? " + "where file_name = ?";
 
-	private static final String DELETE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table"
-			+ "set deleted_flag = true" + "where user_name = ? and file_name = ?";
+	private static final String DELETE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table "
+			+ "set delete_flag = 1 " + "where id = ?";
 
 	private Connection connection;
 
@@ -56,6 +56,22 @@ public final class UserFileRelationDb {
 		}
 	}
 
+	public Optional<UserFileRelation> get(int id) throws SQLException {
+		PreparedStatement preparedStatement = null;
+		ResultSet rs = null;
+		try {
+			preparedStatement = connection.prepareStatement(GET_USER_FILE_RELATION_FOR_GIVEN_ID);
+			preparedStatement.setInt(1, id);
+			rs = preparedStatement.executeQuery();
+			if (rs.next()) {
+				return Optional.of(readUserFileRelation(rs));
+			}
+		} finally {
+			close(Optional.ofNullable(preparedStatement), Optional.ofNullable(rs));
+		}
+		return Optional.empty();
+	}
+
 	public void upload(UserFileRelation userFileRelation) throws SQLException {
 		PreparedStatement preparedStatement = null;
 		int paramCounter = 1;
@@ -74,16 +90,15 @@ public final class UserFileRelationDb {
 		}
 	}
 
-	public void delete(String userName, String fileName) throws SQLException {
+	public void delete(String id) throws SQLException {
 		PreparedStatement preparedStatement = null;
-		ResultSet rs = null;
 		try {
 			preparedStatement = connection.prepareStatement(DELETE_USER_FILE_RELATION_QUERY);
-			preparedStatement.setString(1, userName);
-			preparedStatement.setString(2, fileName);
-			rs = preparedStatement.executeQuery();
+			preparedStatement.setInt(1, Integer.valueOf(id));
+			System.out.println(preparedStatement);
+			preparedStatement.executeUpdate();
 		} finally {
-			close(Optional.ofNullable(preparedStatement), Optional.ofNullable(rs));
+			close(Optional.ofNullable(preparedStatement));
 		}
 	}
 
@@ -100,7 +115,7 @@ public final class UserFileRelationDb {
 //	}
 
 	private UserFileRelation readUserFileRelation(ResultSet rs) throws SQLException {
-		return new UserFileRelation().setCreatedTimestamp(rs.getTimestamp("creation_timestamp"))
+		return new UserFileRelation().setId(rs.getInt("id")).setCreatedTimestamp(rs.getTimestamp("creation_timestamp"))
 				.setFileDesc(rs.getString("file_desc")).setFileName(rs.getString("file_name"))
 				.setFirstName(rs.getString("first_name")).setIsDeleted(rs.getBoolean("delete_flag"))
 				.setLastName(rs.getString("last_name")).setUpdatedTimestamp(rs.getTimestamp("last_updated_timestamp"))

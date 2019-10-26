@@ -65,18 +65,12 @@ public class UserFileRelationController {
 		Part part = request.raw().getPart("file");
 		File scratchFile = File.createTempFile("prefix", "suffix");
 
-//		String file_key = UUID.randomUUID().toString();
 		String userName = null;
 		String firstName = null;
 		String lastName = null;
 		String fileDesc = null;
 		String fileName = part.getSubmittedFileName();
 
-//		AWSCredentials credentials = new ProfileCredentialsProvider("default").getCredentials();
-//		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
-//		credentialsProvider.getCredentials();
-//		AmazonS3 s3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
-//				.withRegion("us-east-2").build();
 		try (InputStream input = part.getInputStream()) {
 			FileUtils.copyInputStreamToFile(input, scratchFile);
 		}
@@ -111,13 +105,13 @@ public class UserFileRelationController {
 	}
 
 	public static Object deleteFile(Request request, Response response) throws SQLException {
-		String userName = request.queryParams("user_name");
-		String fileKey = request.queryParams("file_key");
-		s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileKey));
-
+		String id = request.queryParams("id");
+		String fileKey = request.queryParams("file_name");
 		response.type("application/json");
 		try (Connection connection = DatabaseConnectionManager.getConnection()) {
-			new UserFileRelationDb(connection).delete(userName, fileKey);
+			UserFileRelationDb userFileRelationDb = new UserFileRelationDb(connection);
+			userFileRelationDb.delete(id);
+			s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileKey));
 			return "Success";
 		}
 	}
