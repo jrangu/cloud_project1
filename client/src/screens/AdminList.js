@@ -21,12 +21,6 @@ export default class AdminList extends Component {
          ]
       };
       this.handleChange = this.handleChange.bind(this);
-      //this.currentUser = Auth.user.username();
-      
-    }
-    
-    fetchCurrentUser = async event => {
-        return (await Auth.currentAuthenticatedUser()).username;
     }
     
     renderAdminTableData() {
@@ -53,7 +47,8 @@ export default class AdminList extends Component {
         })
      }
 
-    getfileList = async event => {
+
+    getfileListAPI = async event => {
         this.state.user = (await Auth.currentAuthenticatedUser()).username;
         //alert(this.state.user);
         var url = "http://192.168.0.6:4567/fileList?user_name="+"user_1";
@@ -66,6 +61,14 @@ export default class AdminList extends Component {
         .then(res => this.setState({ apiResponse: res }));
     }
 
+    deleteFileAPI(fileId){
+        alert(this.fileId);
+        fetch("http://localhost:3000/deleteFile/"+fileId, {
+        method: "POST"
+        })
+      .then(res => res.json());
+    }
+    
     handleChange = event => {
         this.setState({
           value: event.target.value
@@ -95,7 +98,7 @@ export default class AdminList extends Component {
     }
 
     // componentWillMount() {
-    //      this.getfileList();
+    //      this.getfileListAPI();
     //     alert("check"+this.state.user);
     // }
     render() {
@@ -106,12 +109,12 @@ export default class AdminList extends Component {
                     <table id='students'>
                         <tbody>
                             <tr>
-                                <th>ID</th>
-                                <th>NAME</th>
-                                <th>AGE</th>
-                                <th>EMAIL</th>
-                                <th></th>
-                                
+                                <th>First Namw</th>
+                                <th>Last Name</th>
+                                <th>File Name</th>
+                                <th>File Description</th>
+                                <th>Created Timestamp</th>
+                                <th>Updated Timestamp</th>
                             </tr>
                             {this.renderAdminTableData()}
                         </tbody>

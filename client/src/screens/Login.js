@@ -34,7 +34,7 @@ export default class Login extends Component {
       alert("Logged in ");
       Auth.currentAuthenticatedUser()
       .then(data => {
-        if(data.username == config.ADMIN_USER){
+        if(data.username === config.ADMIN_USER){
           this.props.history.push("/adminlist");
         }else{
           this.props.history.push("/list");
