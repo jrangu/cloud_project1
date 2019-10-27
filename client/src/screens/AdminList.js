@@ -1,129 +1,129 @@
 import React, { Component } from "react";
-import { Button} from "react-bootstrap";
+import { Button, FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import "./AdminList.css";
-import { Auth } from 'aws-amplify';
+import { Auth } from "aws-amplify";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 
 export default class AdminList extends Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        file : null,
-        value : "",
-        user:"",
-        authState:'loading',
-        apiResponse:[],
-        students: [
-            { id: 1, name: 'Wasif', age: 21, email: 'wasif@email.com' },
-            { id: 2, name: 'Ali', age: 19, email: 'ali@email.com' },
-            { id: 3, name: 'Saad', age: 16, email: 'saad@email.com' },
-            { id: 4, name: 'Asad', age: 25, email: 'asad@email.com' }
-         ]
-      };
-      this.handleChange = this.handleChange.bind(this);
-    }
-    
-    renderAdminTableData() {
-        return this.state.students.map((student, index) => {
-           const { id, name, age, email } = student 
-           return (
-              
-              <tr key={id}>
-                 <td>{id}</td>
-                 <td>{name}</td>
-                 <td>{age}</td>
-                 <td>{email}</td>
-                <td><Button
-                        block
-                        type="submit"
-                        bsSize="large"
-                        >
-                        Delete
-                   </Button>
-                </td>
-              </tr>
-              
-           )
-        })
-     }
+  constructor(props) {
+    super(props);
+    this.state = {
+      file: null,
+      value: "",
+      user: {},
+      apiResponse: []
+    };
+  }
 
+  renderAdminTableData = () => {
+    return this.state.apiResponse.map(filedata => {
+      const {
+        id,
+        first_name,
+        last_name,
+        file_name,
+        file_desc,
+        creation_timestamp,
+        last_updated_timestamp
+      } = filedata;
+      return (
+        <tr key={id}>
+          <td>{first_name}</td>
+          <td>{last_name}</td>
+          <td>{file_name}</td>
+          <td>{file_desc}</td>
+          <td>{creation_timestamp}</td>
+          <td>{last_updated_timestamp}</td>
+          <td>
+            <Button
+              block
+              type="submit"
+              bsSize="large"
+              onClick={() => this.deleteAPI(filedata.id, file_name)}
+            >
+              Delete
+            </Button>
+          </td>
+        </tr>
+      );
+    });
+  };
 
-    getfileListAPI = async event => {
-        this.state.user = (await Auth.currentAuthenticatedUser()).username;
-        //alert(this.state.user);
-        var url = "http://192.168.0.6:4567/fileList?user_name="+"user_1";
-       // fetch("http://192.168.0.6:4567/fileList?username=${encodeURIComponent(this.state.user)}")
-       fetch(url ,
-        {
-            mode: 'no-cors'
-        }) 
-       .then(res => res.json())
-        .then(res => this.setState({ apiResponse: res }));
-    }
+  deleteAPI = async (id, file_name) => {
+    let URL =
+      "http://192.168.0.6:4567/delete?id=" + id + "&file_name=" + file_name;
+    fetch(URL, {
+      mode: "no-cors",
+      method: "POST"
+    }).then(res => {
+      // this.apiCall();
+      return res;
+    });
+  };
 
-    deleteFileAPI(fileId){
-        alert(this.fileId);
-        fetch("http://localhost:3000/deleteFile/"+fileId, {
-        method: "POST"
-        })
-      .then(res => res.json());
-    }
-    
-    handleChange = event => {
+ 
+
+  logoutFunc = async event => {
+    await Auth.signOut();
+    this.props.history.push("/");
+  };
+  renderNavBar() {
+    return (
+      <Navbar fluid collapseOnSelect>
+        <Navbar.Header>
+          <Navbar.Brand>SafeDocs</Navbar.Brand>
+        </Navbar.Header>
+        <Navbar.Collapse>
+          <Nav pullRight>
+            <NavItem onClick={() => this.logoutFunc()}>Logout</NavItem>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
+    );
+  }
+
+  apiCall = async () => {
+    var auth_user = (await Auth.currentAuthenticatedUser()).attributes;
+    this.setState({
+      user: auth_user
+    });
+    let URL = "http://192.168.0.6:4567/adminFileList";
+    fetch(URL)
+      .then(response => response.json())
+      .then(response => {
         this.setState({
-          value: event.target.value
+          apiResponse: response
         });
-    }    
+        console.log("json data is" + JSON.stringify(response));
+      });
+    console.log("after log");
+  };
+  componentDidMount() {
+    this.apiCall();
+  }
 
-    logoutFunc = async event =>{
-        await Auth.signOut();  
-        this.props.history.push("/");
-    }
-
-    renderNavBar(){
-        return(
-        <Navbar fluid collapseOnSelect>
-            <Navbar.Header>
-                <Navbar.Brand>
-                    SafeDocs
-                </Navbar.Brand>
-            </Navbar.Header>
-                <Navbar.Collapse>
-                <Nav pullRight>
-                    <NavItem onClick={() => this.logoutFunc()}>Logout</NavItem>
-                </Nav>
-            </Navbar.Collapse>
-        </Navbar>
-        );
-    }
-
-    // componentWillMount() {
-    //      this.getfileListAPI();
-    //     alert("check"+this.state.user);
-    // }
-    render() {
-        return (
-            <div className="AdminList">
-                {this.renderNavBar()}
-                <form onSubmit={this.fileUpload}>
-                    <table id='students'>
-                        <tbody>
-                            <tr>
-                                <th>First Namw</th>
-                                <th>Last Name</th>
-                                <th>File Name</th>
-                                <th>File Description</th>
-                                <th>Created Timestamp</th>
-                                <th>Updated Timestamp</th>
-                            </tr>
-                            {this.renderAdminTableData()}
-                        </tbody>
-                    </table>
-                </form>   
-                
-            </div>
-        );
-    }
-
-    
+  render() {
+    console.log("render method");
+    return (
+      <div className="AdminList">
+        {this.renderNavBar()}
+        <form>
+          <table id="filelist">
+            <tbody>
+              <tr>
+                <th>FIRST NAME</th>
+                <th>LAST NAME</th>
+                <th>FILE NAME</th>
+                <th>FILE DESCRIPTION</th>
+                <th>CREATED DATE_TIME</th>
+                <th>UPDATED DATE_TIME</th>
+                <th> </th>
+              </tr>
+              {this.renderAdminTableData()}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    );
+  }
 }
