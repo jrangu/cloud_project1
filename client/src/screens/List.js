@@ -20,6 +20,15 @@ export default class List extends Component {
 
  renderUserTableData = () => {
     var url = config.CLOUDFRONT;
+    console.log("resp"+this.state.apiRespose);
+    var api = this.state.apiRespose;
+    //alert(api);
+    // if (typeof api === "undefined") {
+    //     console.log("inside undefined");
+    //        this.state.apiResponse= [];
+          
+    // }
+    console.log("check resp"+this.state.apiRespose);
     return this.state.apiResponse.map(filedata => {
       const {
         id,
@@ -61,7 +70,7 @@ export default class List extends Component {
 
   deleteAPI = async (id, file_name) => {
     let URL =
-      "http://192.168.0.6:4567/delete?id=" + id + "&file_name=" + file_name;
+      "http://localhost:5000/delete?id=" + id + "&file_name=" + file_name;
     fetch(URL, {
       mode: "no-cors",
       method: "POST"
@@ -85,7 +94,7 @@ export default class List extends Component {
     fd.append("first_name", this.state.user.name);
     fd.append("last_name", this.state.user.family_name);
     fd.append("file_desc", this.state.value);
-    fetch("http://192.168.0.6:4567/upload", {
+    fetch("http://localhost:5000/upload", {
       mode: "no-cors",
       method: "POST",
       body: fd
@@ -130,7 +139,7 @@ export default class List extends Component {
       user: auth_user
     });
     let URL =
-      "http://192.168.0.6:4567/fileList?user_name=" + this.state.user.sub;
+      "http://localhost:5000/fileList?user_name=" + this.state.user.sub;
     fetch(URL)
       .then(response => response.json())
       .then(response => {
