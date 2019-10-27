@@ -25,25 +25,34 @@ public class Main {
 
 			return "OK";
 		});
+
 		before((request, response) -> {
 			response.header("Access-Control-Allow-Origin", "*");
 			response.header("Access-Control-Request-Method", "*");
 			response.header("Access-Control-Allow-Headers", "*");
 			response.type("application/json");
 		});
+
 		get("/fileList", (request, response) -> {
 			System.out.println("get file list");
 			return UserFileRelationController.getFileList(request, response);
+		}, new JsonTransformer());
+
+		get("/adminFileList", (request, response) -> {
+			System.out.println("get admin file list");
+			return UserFileRelationController.getAdminFileList(request, response);
 		}, new JsonTransformer());
 
 		post("/delete", (request, response) -> {
 			System.out.println("delete file");
 			return UserFileRelationController.deleteFile(request, response);
 		}, new JsonTransformer());
+
 		post("/upload", (request, response) -> {
 			System.out.println("upload file");
 			return UserFileRelationController.uploadFile(request, response);
 		}, new JsonTransformer());
+
 		awaitInitialization();
 	}
 }

@@ -21,7 +21,7 @@ public final class UserFileRelationDb {
 
 	private static final String GET_FILES_FOR_USER_ID_QUERY = "SELECT * from sys.user_file_table where user_id = ? and not delete_flag";
 
-	private static final String GET_USER_FILE_RELATION_FOR_GIVEN_ID = "SELECT * from sys.user_file_table where id = ?";
+	private static final String GET_ADMIN_USER_FILE_RELATION = "SELECT * from sys.user_file_table where not delete_flag";
 
 	private static final String INSERT_USER_FILE_RELATION_QUERY = "INSERT "
 			+ "sys.user_file_table(user_id, first_name, last_name, file_name, file_desc, creation_timestamp, last_updated_timestamp) "
@@ -30,8 +30,8 @@ public final class UserFileRelationDb {
 	private static final String UPDATE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table"
 			+ "set file_name = ?, file_name = ?, last_updated_timestamp = ? " + "where file_name = ?";
 
-	private static final String DELETE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table "
-			+ "set delete_flag = 1 " + "where id = ?";
+	private static final String DELETE_USER_FILE_RELATION_QUERY = "UPDATE sys.user_file_table " + "set delete_flag = 1 "
+			+ "where id = ?";
 
 	private Connection connection;
 
@@ -56,20 +56,20 @@ public final class UserFileRelationDb {
 		}
 	}
 
-	public Optional<UserFileRelation> get(int id) throws SQLException {
+	public Set<UserFileRelation> get() throws SQLException {
 		PreparedStatement preparedStatement = null;
 		ResultSet rs = null;
 		try {
-			preparedStatement = connection.prepareStatement(GET_USER_FILE_RELATION_FOR_GIVEN_ID);
-			preparedStatement.setInt(1, id);
+			preparedStatement = connection.prepareStatement(GET_ADMIN_USER_FILE_RELATION);
 			rs = preparedStatement.executeQuery();
-			if (rs.next()) {
-				return Optional.of(readUserFileRelation(rs));
+			Set<UserFileRelation> set = new HashSet<>();
+			while (rs.next()) {
+				set.add(readUserFileRelation(rs));
 			}
+			return Collections.unmodifiableSet(set);
 		} finally {
 			close(Optional.ofNullable(preparedStatement), Optional.ofNullable(rs));
 		}
-		return Optional.empty();
 	}
 
 	public void upload(UserFileRelation userFileRelation) throws SQLException {

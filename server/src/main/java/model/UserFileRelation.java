@@ -5,10 +5,10 @@ import java.sql.Timestamp;
 import com.google.gson.annotations.SerializedName;
 
 public class UserFileRelation {
-	
+
 	@SerializedName("id")
 	public int id;
-	
+
 	@SerializedName("user_id")
 	public String userId;
 
@@ -23,10 +23,10 @@ public class UserFileRelation {
 
 	@SerializedName("creation_timestamp")
 	public Timestamp createdTimestamp;
-	
+
 	@SerializedName("last_updated_timestamp")
 	public Timestamp updatedTimestamp;
-	
+
 	@SerializedName("delete_flag")
 	public Boolean isDeleted;
 
@@ -36,12 +36,12 @@ public class UserFileRelation {
 	public int getId() {
 		return id;
 	}
-	
+
 	public UserFileRelation setId(int id) {
 		this.id = id;
 		return this;
 	}
-	
+
 	public String getUserId() {
 		return userId;
 	}
