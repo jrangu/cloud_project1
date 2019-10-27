@@ -31,7 +31,7 @@ export default class Login extends Component {
   
     try {
       const user = await Auth.signIn(this.state.email, this.state.password);
-      alert("Logged in ");
+     // alert("Logged in ");
       Auth.currentAuthenticatedUser()
       .then(data => {
         if(data.username === config.ADMIN_USER){
