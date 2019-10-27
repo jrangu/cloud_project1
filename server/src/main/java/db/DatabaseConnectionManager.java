@@ -27,6 +27,14 @@ public final class DatabaseConnectionManager {
     return ds.getConnection();
   }
 
+  public static void close(Optional<Statement> statementOpt) {
+	    statementOpt.ifPresent(stmt -> {
+	      try {
+	        stmt.close();
+	      } catch (SQLException e) {}
+	    });
+	  }
+  
   public static void close(Optional<Statement> statementOpt, Optional<ResultSet> rsOpt) {
     statementOpt.ifPresent(stmt -> {
       try {
