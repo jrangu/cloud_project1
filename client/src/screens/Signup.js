@@ -1,10 +1,5 @@
 import React, { Component } from "react";
-import {
-  FormGroup,
-  FormControl,
-  ControlLabel,
-  Button
-} from "react-bootstrap";
+import { FormGroup, FormControl, ControlLabel, Button } from "react-bootstrap";
 import "./Signup.css";
 import { Auth } from "aws-amplify";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
@@ -14,18 +9,18 @@ export default class Signup extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      firstname:"",
-      lastname:"",
+      firstname: "",
+      lastname: "",
       email: "",
       password: "",
       confirmPassword: "",
       code: "",
-      setIsLoading : false,
-      setNewUser : null,
-      newUser : null
+      setIsLoading: false,
+      setNewUser: null,
+      newUser: null
     };
   }
-  
+
   validateForm() {
     return (
       this.state.firstname.length > 0 &&
@@ -36,8 +31,6 @@ export default class Signup extends Component {
     );
   }
 
-  
-
   validateConfirmationForm() {
     return this.state.code.length > 0;
   }
@@ -46,8 +39,7 @@ export default class Signup extends Component {
     this.setState({
       [event.target.id]: event.target.value
     });
-  }
-
+  };
 
   handleSubmit = async event => {
     event.preventDefault();
@@ -55,31 +47,31 @@ export default class Signup extends Component {
       const newUser = await Auth.signUp({
         username: this.state.email,
         password: this.state.password,
-        attributes : {
-           email : this.state.email,
-           name : this.state.firstname,
-           family_name:  this.state.lastname
+        attributes: {
+          email: this.state.email,
+          name: this.state.firstname,
+          family_name: this.state.lastname
         }
       });
-     
-     this.props.history.push("/list");
-      this.state.setNewUser=newUser;
-      alert("User is added");
+
+      alert(
+        "An administrator needs to confirm your account. Please check back later."
+      );
+      this.props.history.push("/login");
+      this.state.setNewUser = newUser;
     } catch (e) {
       alert(e.message);
     }
-  }
+  };
 
   render() {
     return (
       <div className="Signup">
-       <Navbar fluid collapseOnSelect>
+        <Navbar fluid collapseOnSelect>
           <Navbar.Header>
-            <Navbar.Brand>
-              SafeDocs
-            </Navbar.Brand>
+            <Navbar.Brand>SafeDocs</Navbar.Brand>
           </Navbar.Header>
-		      <Navbar.Collapse>
+          <Navbar.Collapse>
             <Nav pullRight>
               <LinkContainer to="/signup">
                 <NavItem>Signup</NavItem>
@@ -90,60 +82,58 @@ export default class Signup extends Component {
             </Nav>
           </Navbar.Collapse>
         </Navbar>
-      <form onSubmit={this.handleSubmit}>
-        
-         <FormGroup controlId="firstname" bsSize="large">
-          <ControlLabel>First Name</ControlLabel>
-          <FormControl
-            autoFocus
-            value={this.state.firstname}
-            onChange={this.handleChange}
-          />
-        </FormGroup>
-        <FormGroup controlId="lastname" bsSize="large">
-          <ControlLabel>Last Name</ControlLabel>
-          <FormControl
-            autoFocus
-            value={this.state.lastname}
-            onChange={this.handleChange}
-          />
-        </FormGroup>
-        <FormGroup controlId="email" bsSize="large">
-          <ControlLabel>Email</ControlLabel>
-          <FormControl
-            autoFocus
-            type="email"
-            value={this.state.email}
-            onChange={this.handleChange}
-          />
-        </FormGroup>
-        <FormGroup controlId="password" bsSize="large">
-          <ControlLabel>Password</ControlLabel>
-          <FormControl
-            value={this.state.password}
-            onChange={this.handleChange}
-            type="password"
-          />
-        </FormGroup>
-        <FormGroup controlId="confirmPassword" bsSize="large">
-          <ControlLabel>Confirm Password</ControlLabel>
-          <FormControl
-            value={this.state.confirmPassword}
-            onChange={this.handleChange}
-            type="password"
-          />
-        </FormGroup>
-        <Button
-          block
-          type="submit"
-          bsSize="large"
-          isLoading={this.state.isLoading}
-          disabled={!this.validateForm()}
-        >
-          Signup
-        </Button>
-        
-      </form>
+        <form onSubmit={this.handleSubmit}>
+          <FormGroup controlId="firstname" bsSize="large">
+            <ControlLabel>First Name</ControlLabel>
+            <FormControl
+              autoFocus
+              value={this.state.firstname}
+              onChange={this.handleChange}
+            />
+          </FormGroup>
+          <FormGroup controlId="lastname" bsSize="large">
+            <ControlLabel>Last Name</ControlLabel>
+            <FormControl
+              autoFocus
+              value={this.state.lastname}
+              onChange={this.handleChange}
+            />
+          </FormGroup>
+          <FormGroup controlId="email" bsSize="large">
+            <ControlLabel>Email</ControlLabel>
+            <FormControl
+              autoFocus
+              type="email"
+              value={this.state.email}
+              onChange={this.handleChange}
+            />
+          </FormGroup>
+          <FormGroup controlId="password" bsSize="large">
+            <ControlLabel>Password</ControlLabel>
+            <FormControl
+              value={this.state.password}
+              onChange={this.handleChange}
+              type="password"
+            />
+          </FormGroup>
+          <FormGroup controlId="confirmPassword" bsSize="large">
+            <ControlLabel>Confirm Password</ControlLabel>
+            <FormControl
+              value={this.state.confirmPassword}
+              onChange={this.handleChange}
+              type="password"
+            />
+          </FormGroup>
+          <Button
+            block
+            type="submit"
+            bsSize="large"
+            isLoading={this.state.isLoading}
+            disabled={!this.validateForm()}
+          >
+            Signup
+          </Button>
+        </form>
       </div>
     );
   }

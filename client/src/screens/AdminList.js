@@ -51,7 +51,7 @@ export default class AdminList extends Component {
 
   deleteAPI = async (id, file_name) => {
     let URL =
-      "http://localhost:5000/delete?id=" + id + "&file_name=" + file_name;
+      "http://18.219.187.26/api/delete?id=" + id + "&file_name=" + file_name;
     fetch(URL, {
       mode: "no-cors",
       method: "POST"
@@ -87,7 +87,7 @@ export default class AdminList extends Component {
     this.setState({
       user: auth_user
     });
-    let URL = "http://localhost:5000/adminFileList";
+    let URL = "http://18.219.187.26/api/adminFileList";
     fetch(URL)
       .then(response => response.json())
       .then(response => {

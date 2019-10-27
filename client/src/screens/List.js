@@ -70,7 +70,7 @@ export default class List extends Component {
 
   deleteAPI = async (id, file_name) => {
     let URL =
-      "http://localhost:5000/delete?id=" + id + "&file_name=" + file_name;
+      "http://18.219.187.26/api/delete?id=" + id + "&file_name=" + file_name;
     fetch(URL, {
       mode: "no-cors",
       method: "POST"
@@ -94,7 +94,7 @@ export default class List extends Component {
     fd.append("first_name", this.state.user.name);
     fd.append("last_name", this.state.user.family_name);
     fd.append("file_desc", this.state.value);
-    fetch("http://localhost:5000/upload", {
+    fetch("http://18.219.187.26/api/upload", {
       mode: "no-cors",
       method: "POST",
       body: fd
@@ -139,7 +139,7 @@ export default class List extends Component {
       user: auth_user
     });
     let URL =
-      "http://localhost:5000/fileList?user_name=" + this.state.user.sub;
+      "http://18.219.187.26/api/fileList?user_name=" + this.state.user.sub;
     fetch(URL)
       .then(response => response.json())
       .then(response => {
