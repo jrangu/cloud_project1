@@ -58,6 +58,18 @@ public class UserFileRelationController {
 		}
 	}
 
+	public static Object getAdminFileList(Request request, Response response) throws SQLException {
+		response.type("application/json");
+		try (Connection connection = DatabaseConnectionManager.getConnection()) {
+			Set<UserFileRelation> prescription = new UserFileRelationDb(connection).get();
+			if (!prescription.isEmpty()) {
+				return prescription;
+			} else {
+				return new ErrorResponse().setErrorMessage("Prescription not found");
+			}
+		}
+	}
+
 	public static Object uploadFile(Request request, Response response)
 			throws IOException, ServletException, SQLException {
 		response.type("application/json");
