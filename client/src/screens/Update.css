@@ -1,0 +1,11 @@
+@media all and (min-width: 480px) {
+    .Update {
+      padding: 0px 0;
+    }
+  
+    .Update form {
+      margin-left: 20px;
+      max-width: 320px;
+    }
+
+}
